@@ -1,0 +1,44 @@
+category,patterns,response,suggestions,badge
+greeting_casual,"hello|hi|hey|hiya|howdy|sup|yo|greetings|good day|heya","Hello! Welcome to The Zebra Crossing - your UK Road Safety and Highway Code assistant. I am here to help you understand traffic rules, priority at junctions, pedestrian crossings, and safe driving practices. What would you like to explore today?","Can I overtake someone stopped at a zebra crossing?|What does a flashing amber light mean at a pelican crossing?|Who has priority when turning into a road?","INTERACTIVE CHAT"
+greeting_morning,"good morning|morning","Good morning! Ready to brush up on UK road safety and the Highway Code? Whether you are heading out on the road or studying for your driving theory test, feel free to ask me any traffic question!","Can I overtake someone stopped at a zebra crossing?|What is the two-second rule for following distance?|Take the Highway Code Quiz","INTERACTIVE CHAT"
+greeting_afternoon_evening,"good afternoon|good evening|evening","Good day! Welcome to The Zebra Crossing. Remember to use dipped headlights when driving in dull or dark conditions (Rule 113). How can I assist you with the Highway Code today?","When MUST headlights be used?|Can a cyclist ride across a Toucan crossing?|Who has priority at a roundabout?","INTERACTIVE CHAT"
+wellbeing,"how are you|how are you doing|how's it going|how are things|how do you do|how r u|hope you are well","I am doing great, thank you for asking! I am all set to help you navigate UK traffic rules, legal distinctions (MUST vs SHOULD), and road safety best practices. What road rule are you curious about today?","Who has priority when turning into a side road?|Can cyclists ride across a Toucan crossing?|Practice real-world driving scenarios","INTERACTIVE CHAT"
+identity,"who are you|what is your name|what are you|tell me about yourself|who made you|what is the zebra crossing","I am **The Zebra Crossing**, an interactive assistant specializing in the UK Highway Code and road safety. I combine hybrid semantic search with legal authority grounding to explain mandatory laws ([MUST]) where violation is a criminal offence, versus advisory best practices ([SHOULD]).","What is the difference between MUST and SHOULD in the Highway Code?|Can I park on the pavement?|What is the Dutch Reach technique?","INTERACTIVE CHAT"
+capabilities_help,"what can you do|help|how do you work|what can i ask|what can you help me with|features|commands|options|instructions","Here is what I can do for you:
+* **Official Highway Code Q&A:** Ask any traffic question with citations to exact rule numbers.
+* **Legal Status Grounding:** Distinguishes between criminal laws ([MUST]) and advisory guidelines ([SHOULD]).
+* **Interactive Safety Quiz:** Test your knowledge with real-world questions and explanations.
+* **Hazard Scenarios:** Practice 'What Would You Do?' driving challenges.
+* **Rule Explorer:** Browse rules by topic or search specific rules.","Take the Highway Code Quiz|Can I overtake someone stopped at a zebra crossing?|Can I check my phone while stopped at a red light?","INTERACTIVE CHAT"
+appreciation,"thank you|thanks|thx|cheers|thank you so much|appreciate it|great job|awesome|good job|cool|nice|brilliant|perfect","You are very welcome! Stay safe and courteous out on the roads. Let me know whenever you need another Highway Code rule clarified!","What is the two-second rule?|How does rain affect stopping distances?|Test your knowledge with the Quiz","INTERACTIVE CHAT"
+farewell,"bye|goodbye|see you|see ya|cya|have a good day|good night|catch you later","Goodbye! Safe travels, always look out for vulnerable road users, and remember your safe stopping distances. See you next time!","Can I overtake at a zebra crossing?|What is the national speed limit on single carriageways?|Take the Highway Code Quiz","INTERACTIVE CHAT"
+driving_tips,"tip|driving tip|safety tip|give me a tip|tell me a tip|road safety tip|advice|driving advice","**Road Safety Tip:**
+* **Following Distance:** In dry conditions, allow at least a 2-second gap behind the vehicle in front (Rule 126).
+* **Wet Weather:** Double the distance to at least 4 seconds, as tyres have less grip.
+* **Vulnerable Users:** Always give cyclists at least 1.5 metres of clearance when overtaking at speeds up to 30 mph (Rule 163).","How much space must drivers give cyclists?|What is the Dutch Reach technique?|How does wet weather affect stopping distances?","SAFETY TIP"
+highway_code_info,"what is the highway code|explain the highway code|why is the highway code important|about the highway code","The **UK Highway Code** is the official statutory guide for all road users in England, Scotland, and Wales. It applies to drivers, cyclists, pedestrians, motorcyclists, and horse riders.
+
+Key legal distinction:
+* **MUST / MUST NOT**: Indicates legal requirements under criminal traffic law (e.g. Road Traffic Act). Disobeying them is a criminal offense.
+* **SHOULD / SHOULD NOT**: Advisory guidance. Failure to adhere can be used as evidence in court to establish liability or negligence.","What is the Hierarchy of Road Users?|Who has priority at a roundabout?|Can I enter a yellow box junction?","HIGHWAY CODE INFO"
+hierarchy_info,"hierarchy of road users|road hierarchy|who has priority|who is most vulnerable","The **Hierarchy of Road Users** (Rule H1) prioritizes those most at risk in collisions:
+1. Pedestrians (especially children, older adults, disabled people)
+2. Cyclists
+3. Horse riders
+4. Motorcyclists
+5. Cars and taxis
+6. Vans and minibuses
+7. Large HGVs and buses
+
+Rule H1 establishes that road users with the greatest potential to cause harm bear the greatest responsibility to reduce danger to others.","Who has priority when turning into a side road?|How much space should drivers give cyclists?|Can a cyclist ride across a Toucan crossing?","INTERACTIVE CHAT"
+quiz_prompt,"quiz|take a quiz|test me|quiz me|road safety quiz|trivia|test my knowledge","Ready to test your road safety knowledge?
+* **In this Web App:** Click on **'Interactive Safety Quiz'** in the sidebar navigation!
+* **In the Terminal:** Simply type `quiz`.
+
+You will get 8 multiple-choice questions on crossings, right-of-way, and signs with immediate score feedback and rule explanations!","Can I overtake someone stopped at a zebra crossing?|The amber light is flashing at a pelican crossing, can I proceed?|Can a cyclist ride across a Toucan crossing?","INTERACTIVE CHAT"
+scenario_prompt,"scenarios|practice scenarios|hazard scenarios|what would you do|driving situations","Looking to practice real-world decision-making?
+* **In this Web App:** Click on **'Road Scenarios'** in the sidebar navigation!
+* **In the Terminal:** Type `scenario`.
+
+You will encounter challenging driving situations (e.g. heavy rain, emergency vehicles) and choose the safest, legal course of action.","How does wet weather affect stopping distances?|Can I enter a yellow box junction if turning right?|What is the two-second rule?","INTERACTIVE CHAT"
+confirmation_casual,"ok|okay|got it|understood|sure|alright|fine","Great! Let me know whenever you have a road safety or traffic question. You can ask about any crossing type, speed limits, parking, priority, or driving rules!","Can I overtake someone stopped at a zebra crossing?|Can I check my phone at a red traffic light?|What is the Dutch Reach technique?","INTERACTIVE CHAT"

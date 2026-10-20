@@ -1,0 +1,95 @@
+# =============================================================================
+# THE OFFICIAL UK HIGHWAY CODE - ROAD SAFETY RULES DATABASE
+# =============================================================================
+# Format: [RULE <id>] [<LEGAL_WEIGHT: MUST|SHOULD>] <Title>
+# Note:
+#   [MUST]   denotes a mandatory legal requirement under UK law (Road Traffic Act).
+#            Failure to comply is a criminal offense punishable by fines, penalty points, or disqualification.
+#   [SHOULD] denotes advisory guidance and best practice.
+#            Failure to adhere may be used in court as evidence of liability in civil or criminal proceedings.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# GENERAL RULES FOR PEDESTRIANS & CROSSINGS
+# -----------------------------------------------------------------------------
+
+[RULE 7] [SHOULD] The Green Cross Code
+The Green Cross Code outlines the fundamental steps for pedestrians to cross safely:
+1. First find a safe place to cross where you have a clear view of traffic in all directions.
+2. Stop just before you reach the kerb, well back from the traffic.
+3. Look all around for traffic and listen carefully.
+4. If traffic is coming, let it pass. Do not cross until there is a safe gap and you are certain there is plenty of time.
+5. When it is safe, walk straight across the road; do not run. Keep looking and listening for traffic while crossing.
+
+[RULE 19] [SHOULD] Pelican Crossings for Pedestrians
+Pelican crossings are signal-controlled crossings operated by pedestrians. Press the button and wait for the green walking figure to show before crossing. When the green figure begins to flash, you SHOULD NOT start to cross, but if you are already on the crossing you have plenty of time to finish crossing safely.
+
+[RULE 25] [MUST] School Crossing Patrols
+You MUST stop when a School Crossing Patrol (lollipop person) shows a 'STOP - CHILDREN' sign. Drivers must remain stopped until the patrol officer and all children have safely reached the pavement and the sign has been lowered.
+
+# -----------------------------------------------------------------------------
+# SPEED LIMITS, STOPPING DISTANCES & DRIVER ATTENTION
+# -----------------------------------------------------------------------------
+
+[RULE 124] [MUST] National Speed Limits
+You MUST NOT exceed the maximum speed limits for the road and for your vehicle type:
+- In built-up areas with street lights, the standard speed limit is 30 mph (20 mph in many residential zones and Wales).
+- On single carriageways, the national speed limit for cars and motorcycles is 60 mph.
+- On dual carriageways and motorways, the speed limit for cars and motorcycles is 70 mph.
+A speed limit is an absolute maximum and does not mean it is always safe to drive at that speed.
+
+[RULE 126] [SHOULD] Stopping Distances and the Two-Second Rule
+Drive at a speed that will allow you to stop well within the distance you can see to be clear:
+- In good dry conditions, leave at least a two-second gap between your vehicle and the vehicle in front.
+- In wet weather, stopping distances double, so you should leave at least a four-second gap.
+- In icy or snowy weather, stopping distances can increase by up to ten times.
+
+[RULE 149] [MUST] Handheld Mobile Phones and Smart Devices
+You MUST NOT use a handheld mobile phone, sat nav, tablet, or any device capable of interactive communication while driving or riding a motorcycle. This applies even when stopped at traffic lights or queued in traffic. It is only permitted if making a 999 emergency call where it is unsafe or impossible to stop, or making a contactless payment at a drive-through while stationary.
+
+# -----------------------------------------------------------------------------
+# JUNCTIONS, SIGNALS, AND ROUNDABOUTS
+# -----------------------------------------------------------------------------
+
+[RULE 170] [SHOULD] Junctions and Pedestrians
+Take extra care at junctions. You should watch out for pedestrians crossing or waiting to cross. If pedestrians have started crossing and traffic wants to turn into the road, the pedestrians have priority and you MUST give way. You SHOULD give way to pedestrians waiting to cross. Watch out for cyclists, horse riders and motorcyclists crossing or waiting to cross.
+
+[RULE 171] [MUST] Junction Stop Lines
+You MUST stop behind the line at a junction with a 'Stop' sign and a solid white line across the road, even if no traffic is approaching. You must not go forward until the way is clear and it is safe to proceed.
+
+[RULE 172] [MUST] Junction Give Way Lines
+The approach to a junction may have a 'Give Way' sign or a broken white line across the road. You MUST give way to traffic on the main road and wait for a safe gap before continuing. You should also give way to pedestrians and cyclists crossing the road you are turning into.
+
+# -----------------------------------------------------------------------------
+# DRIVER RULES FOR PEDESTRIAN CROSSINGS
+# -----------------------------------------------------------------------------
+
+[RULE 191] [MUST] Zebra Crossings - Overtaking and Parking
+You MUST NOT park on a crossing or in the area covered by the zig-zag markings. You MUST NOT overtake the moving vehicle nearest the crossing or the vehicle nearest the crossing which has stopped to allow pedestrians to cross.
+
+[RULE 195] [MUST] Zebra Crossings - Giving Way to Pedestrians
+You MUST give way when a pedestrian has moved onto a crossing. You SHOULD give way to pedestrians waiting to cross at a zebra crossing, and be ready to slow down or stop. Always check your mirrors, slow down, and give pedestrians plenty of time to cross safely. Do not wave them across as this can be dangerous.
+
+[RULE 196] [MUST] Pelican Crossings - Flashing Amber Signal
+Pelican crossings are signal-controlled crossings operated by pedestrians. The flashing amber signal light follows the red stop light. When the amber light is flashing, you MUST give way to any pedestrians on the crossing. If the crossing is clear, you may proceed even while the amber light is flashing.
+
+[RULE 198] [MUST] Toucan Crossings - Cyclists and Pedestrians
+Toucan crossings are light-controlled crossings which allow cyclists to ride across alongside pedestrians. Cyclists and pedestrians share the unsegregated crossing area. Cyclists are permitted to cycle across.
+
+# -----------------------------------------------------------------------------
+# VULNERABLE ROAD USERS & HIERARCHY OF RESPONSIBILITY
+# -----------------------------------------------------------------------------
+
+[RULE 204] [SHOULD] The Hierarchy of Road Users
+The 'Hierarchy of Road Users' places those road users most at risk in the event of a collision at the top of the hierarchy:
+1. Pedestrians (especially children, older adults, and disabled people).
+2. Cyclists.
+3. Horse riders and horse-drawn vehicles.
+4. Motorcyclists.
+5. Cars and taxis.
+6. Vans and minibuses.
+7. Large goods vehicles and buses.
+Those who operate vehicles that can cause the greatest harm have the greatest responsibility to take care and reduce the danger they pose to others.
+
+[RULE 239] [SHOULD] Parking Safely and the Dutch Reach
+When parking, turn off your engine, apply the handbrake, and ensure your vehicle is secure. When opening your door from the inside, you should use the 'Dutch Reach' technique: open the door using your hand furthest from the door (e.g. left hand for the driver's door). This forces you to turn your head and look over your shoulder for passing cyclists, pedestrians, or motorcyclists.
