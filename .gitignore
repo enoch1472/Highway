@@ -1,0 +1,28 @@
+# Environment
+.env
+
+# ChromaDB vector store (rebuild from rules.txt)
+chroma_db/
+
+# Vision cache (rebuild from API calls)
+vision_cache/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# HuggingFace / torch model cache
+.cache/
+*.bin
+*.safetensors
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+Thumbs.db
+.DS_Store
