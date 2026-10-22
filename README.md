@@ -15,7 +15,58 @@ I designed the assistant around a curated knowledge base of 15 essential UK High
 
 **System Architecture**
 
-I designed my project using a multi-stage local retrieval-augmented generation (RAG) architecture:
+I designed my project using a multi-stage local retrieval-augmented generation (RAG) architecture. Below is the end-to-end architectural workflow I built:
+
+```
++-----------------------------------------------------------------------------+
+|                            USER INTERFACES                                  |
+|   Terminal CLI (main.py)  |  Web UI (web_ui.py)  |  Streamlit (app.py)      |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                      CONVERSATIONAL INTENT ROUTER                           |
+|   Fast Regex Matcher (interactive_prompts.csv)                              |
+|   * Greetings / Farewells / Gratitude  --->  [Instant Reply < 5ms]          |
++-----------------------------------------------------------------------------+
+                                      | [Road Safety Query]
+                                      v
++-----------------------------------------------------------------------------+
+|                       DUAL-PATH HYBRID RETRIEVER                            |
+|                                                                             |
+|   [Path A: Dense Vector Search]          [Path B: Sparse Lexical BM25]      |
+|   all-MiniLM-L6-v2 Embeddings            Custom BM25 Scorer                 |
+|   ChromaDB Vector Store (15 Rules)       Term Frequency & IDF Scoring       |
+|                                                                             |
+|                 Unified Reciprocal Rank Fusion (RRF)                        |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                         DOMAIN GUARDRAIL CHECK                              |
+|           Cosine Distance > 0.52  --->  [Reject: Out-of-Domain Fallback]    |
++-----------------------------------------------------------------------------+
+                                      | [Distance <= 0.52: In-Domain Match]
+                                      v
++-----------------------------------------------------------------------------+
+|                      LOCAL REASONING ENGINE (LLM)                           |
+|              Qwen2.5-1.5B-Instruct Model (Local Transformers)               |
+|              Strict ground-truth extraction from retrieved text             |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                    CITATION VALIDATOR & WEIGHT CLASSIFIER                   |
+|   * Citation Guard: Verify cited rule numbers against 15 indexed rules      |
+|   * Legal Weight: MUST (Criminal Offence) vs SHOULD (Advisory Guidance)    |
+|   * Suggestions: Append 3 contextual follow-up questions                    |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                    FINAL GROUNDED RESPONSE WITH BADGES                      |
++-----------------------------------------------------------------------------+
+```
 
 1. User Interface Layer
 I provide three distinct ways to interact with my assistant:
