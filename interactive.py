@@ -1,18 +1,8 @@
-"""
-interactive.py - Rich Interactive Experience for The Zebra Crossing Assistant.
-
-Provides:
-1. Interactive Highway Code Quiz Mode with instant grading and rule citations.
-2. Real-World Road Scenario Challenges ("What Would You Do?").
-3. Rule Explorer: Categorized browsing and instant keyword search.
-4. Rich terminal formatting using the 'rich' library (with graceful fallback).
-"""
+# Enoch Obikoya - Personal Road Safety Assistant Project
 
 import sys
-import time
 from typing import List, Dict, Optional, Tuple
 
-# Ensure UTF-8 stdout for Windows consoles
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -32,9 +22,6 @@ except ImportError:
     console = None
 
 
-# -----------------------------------------------------------------------------
-# HIGHWAY CODE QUIZ QUESTIONS
-# -----------------------------------------------------------------------------
 QUIZ_QUESTIONS = [
     {
         "id": 1,
@@ -143,9 +130,6 @@ QUIZ_QUESTIONS = [
 ]
 
 
-# -----------------------------------------------------------------------------
-# REAL-WORLD ROAD SCENARIOS
-# -----------------------------------------------------------------------------
 SCENARIOS = [
     {
         "id": 1,
@@ -193,9 +177,8 @@ SCENARIOS = [
 ]
 
 
+# Enoch Obikoya - Interactive quiz, hazard scenarios, and rule browser presentation
 class InteractivePresenter:
-    """Renders formatted console output with rich styling or clean text fallback."""
-
     @staticmethod
     def print_banner():
         if RICH_AVAILABLE:
@@ -211,7 +194,6 @@ class InteractivePresenter:
 
     @staticmethod
     def print_assistant_response(response: Dict):
-        """Displays assistant response with badges, citations, and follow-ups."""
         answer = response.get("answer", "")
         legal = response.get("legal_weight", "GUIDELINE")
         retrieved = response.get("retrieved_rules", [])
@@ -220,7 +202,6 @@ class InteractivePresenter:
         is_conversational = response.get("is_conversational", False)
 
         if RICH_AVAILABLE:
-            # Legal Badge styling
             if is_conversational:
                 badge = "[bold white on green] INTERACTIVE CHAT [/bold white on green]"
             elif legal == "MUST":
@@ -237,7 +218,6 @@ class InteractivePresenter:
             panel_border = "green" if is_conversational else "cyan"
             console.print(Panel(content, title=panel_title, border_style=panel_border))
 
-            # Retrieved Rules Table (skip for conversational responses)
             if retrieved and not is_conversational:
                 table = Table(title="Relevant Rules Retrieved", show_header=True, header_style="bold magenta")
                 table.add_column("Rule ID", style="bold yellow", width=12)
@@ -256,12 +236,10 @@ class InteractivePresenter:
                     )
                 console.print(table)
 
-            # Smart Suggestions
             if suggestions:
                 sugg_text = "\n".join([f"  * {s}" for s in suggestions])
                 console.print(Panel(sugg_text, title="[bold green]You might also want to ask:[/bold green]", border_style="green"))
         else:
-            # Plain terminal fallback
             print("\n" + "=" * 70)
             label = "INTERACTIVE CHAT" if is_conversational else f"ASSISTANT [{legal}]"
             print(f"{label}:")
@@ -282,7 +260,6 @@ class InteractivePresenter:
 
 
 def run_quiz_session():
-    """Runs an interactive multiple-choice Highway Code quiz."""
     print("\n" + "=" * 78)
     print("THE ZEBRA CROSSING - INTERACTIVE ROAD SAFETY QUIZ")
     print("Test your knowledge of UK traffic rules, crossings, and priority!")
@@ -331,7 +308,6 @@ def run_quiz_session():
 
 
 def run_scenario_session():
-    """Runs interactive real-world hazard scenario exercises."""
     print("\n" + "=" * 78)
     print("INTERACTIVE ROAD SCENARIOS - 'WHAT WOULD YOU DO?'")
     print("Put yourself in the driver's seat and make the safe call!")
@@ -365,7 +341,6 @@ def run_scenario_session():
 
 
 def browse_rules_catalog(rag):
-    """Categorized rule browser for exploring Highway Code rules."""
     print("\n" + "=" * 78)
     print("UK HIGHWAY CODE RULES CATALOG")
     print("=" * 78)

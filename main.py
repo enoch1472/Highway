@@ -1,24 +1,8 @@
-"""
-=============================================================================
-THE ZEBRA CROSSING - ROAD SAFETY ASSISTANT (INTERACTIVE Q&A)
-=============================================================================
-A local, offline assistant for UK road safety rules and the Highway Code.
-Designed for pair programming, interactive learning, and Spyder/terminal use.
-
-Key Capabilities:
-- Conversational road safety Q&A grounded strictly in the official Highway Code.
-- Hybrid Semantic Retrieval (MiniLM-L6-v2 + BM25) with strict 0.52 distance guardrail.
-- Preserves legal authority: clearly distinguishes mandatory MUST vs advisory SHOULD.
-- Interactive Highway Code Quiz ('quiz') with real-time scoring and explanations.
-- Real-World Driving Scenarios ('scenario') for hazard awareness practice.
-- Interactive Rule Explorer ('browse', 'search <term>', 'rule <id>').
-- Optional Zero-Dependency Web UI matching Design.png ('web' or --web).
-=============================================================================
-"""
+# Enoch Obikoya - Personal Road Safety Assistant Project
+# Main application entry point developed by Enoch Obikoya
 
 import sys
 import os
-import time
 import argparse
 from typing import Optional
 
@@ -40,10 +24,6 @@ from interactive import (
 
 
 def ask_assistant(rag: RuleRAG, llm: LocalQwenLLM, question: str, verbose: bool = False):
-    """
-    Standard helper for backward compatibility with existing scripts.
-    Delegates retrieval and reasoning to the pipeline.
-    """
     retrieved_rules, status_msg = rag.retrieve(
         query=question,
         top_k=3,
@@ -64,10 +44,6 @@ def ask_assistant(rag: RuleRAG, llm: LocalQwenLLM, question: str, verbose: bool 
 
 
 def interactive_session(assistant: RoadSafetyAssistant):
-    """
-    Rich interactive Q&A session with conversational follow-ups,
-    quizzes, scenarios, and rule search.
-    """
     InteractivePresenter.print_banner()
 
     print("Welcome! You can ask any traffic rule, road safety, or Highway Code question.")
@@ -99,12 +75,10 @@ def interactive_session(assistant: RoadSafetyAssistant):
 
             cmd_lower = user_input.lower()
 
-            # Session Exit
             if cmd_lower in ("q", "quit", "exit"):
                 print("\nThank you for using The Zebra Crossing Assistant. Stay safe on the roads!\n")
                 break
 
-            # Help Command
             if cmd_lower in ("help", "?", "commands"):
                 print("\nAvailable Commands:")
                 print("  • quiz          : Test your knowledge with interactive quiz")
@@ -118,28 +92,23 @@ def interactive_session(assistant: RoadSafetyAssistant):
                 print("  • exit or q     : Quit\n")
                 continue
 
-            # Clear Screen
             if cmd_lower in ("clear", "cls"):
                 os.system("cls" if os.name == "nt" else "clear")
                 InteractivePresenter.print_banner()
                 continue
 
-            # Interactive Quiz Mode
             if cmd_lower == "quiz":
                 run_quiz_session()
                 continue
 
-            # Interactive Scenario Challenge
             if cmd_lower in ("scenario", "practice"):
                 run_scenario_session()
                 continue
 
-            # Browse Rules Catalog
             if cmd_lower in ("browse", "rules", "catalog"):
                 browse_rules_catalog(assistant.rag)
                 continue
 
-            # Keyword Rule Search
             if cmd_lower.startswith("search "):
                 keyword = user_input[7:].strip()
                 matches = assistant.rag.search_by_keyword(keyword)
@@ -152,7 +121,6 @@ def interactive_session(assistant: RoadSafetyAssistant):
                     print(f"\nNo rules found matching '{keyword}'.\n")
                 continue
 
-            # View Specific Rule by ID or number
             if cmd_lower.startswith("rule "):
                 rule_arg = user_input[5:].strip()
                 clean_num = rule_arg.replace("RULE", "").strip()
@@ -169,7 +137,6 @@ def interactive_session(assistant: RoadSafetyAssistant):
                     print(f"\nRule '{rule_arg}' not found.\n")
                 continue
 
-            # Session History
             if cmd_lower == "history":
                 if not assistant.history:
                     print("\nNo questions asked yet in this session.\n")
@@ -182,13 +149,11 @@ def interactive_session(assistant: RoadSafetyAssistant):
                     print("=" * 60 + "\n")
                 continue
 
-            # Launch Web UI
             if cmd_lower == "web":
                 from web_ui import launch_web_ui
                 launch_web_ui(assistant)
                 continue
 
-            # Launch Streamlit GUI
             if cmd_lower in ("gui", "streamlit"):
                 import subprocess
                 print("\nLaunching Streamlit GUI (app.py)...", flush=True)
@@ -197,7 +162,6 @@ def interactive_session(assistant: RoadSafetyAssistant):
                 subprocess.run([sys.executable, "-m", "streamlit", "run", "app.py"])
                 continue
 
-            # Standard Question Processing through Assistant Pipeline
             print("\nSearching Highway Code rules & reasoning...", flush=True)
             response = assistant.ask(user_input)
             InteractivePresenter.print_assistant_response(response)
@@ -208,6 +172,7 @@ def interactive_session(assistant: RoadSafetyAssistant):
             print(f"\n[Notice] {e}\n")
 
 
+# Enoch Obikoya - CLI parsing and component setup
 def main():
     parser = argparse.ArgumentParser(description="The Zebra Crossing - Road Safety Assistant")
     parser.add_argument("--quiz", action="store_true", help="Launch interactive Highway Code quiz and exit")
@@ -218,14 +183,12 @@ def main():
     parser.add_argument("--question", type=str, default=None, help="Ask a single question and exit")
     args, _ = parser.parse_known_args()
 
-    # UTF-8 stdout setup for Windows
     if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
         try:
             sys.stdout.reconfigure(encoding="utf-8", errors="replace")
         except Exception:
             pass
 
-    # Launch Streamlit web interface if requested
     if getattr(args, "streamlit", False):
         import subprocess
         print("\nLaunching Streamlit GUI (app.py)...", flush=True)
@@ -262,7 +225,6 @@ def main():
         InteractivePresenter.print_assistant_response(resp)
         return
 
-    # Default: launch rich interactive session
     interactive_session(assistant)
 
 
