@@ -15,82 +15,66 @@ I designed the assistant around a curated knowledge base of 15 essential UK High
 
 **System Architecture**
 
-I designed my project using a multi-stage local retrieval-augmented generation (RAG) architecture. Below is the end-to-end architectural workflow I built:
+Here is the system architecture I designed for my project and how data moves through my pipeline:
 
 ```
-+-----------------------------------------------------------------------------+
-|                            USER INTERFACES                                  |
-|   Terminal CLI (main.py)  |  Web UI (web_ui.py)  |  Streamlit (app.py)      |
-+-----------------------------------------------------------------------------+
+                       +-----------------------------+
+                       | User Query (CLI / Web / UI) |
+                       +-----------------------------+
                                       |
                                       v
-+-----------------------------------------------------------------------------+
-|                      CONVERSATIONAL INTENT ROUTER                           |
-|   Fast Regex Matcher (interactive_prompts.csv)                              |
-|   * Greetings / Farewells / Gratitude  --->  [Instant Reply < 5ms]          |
-+-----------------------------------------------------------------------------+
-                                      | [Road Safety Query]
-                                      v
-+-----------------------------------------------------------------------------+
-|                       DUAL-PATH HYBRID RETRIEVER                            |
-|                                                                             |
-|   [Path A: Dense Vector Search]          [Path B: Sparse Lexical BM25]      |
-|   all-MiniLM-L6-v2 Embeddings            Custom BM25 Scorer                 |
-|   ChromaDB Vector Store (15 Rules)       Term Frequency & IDF Scoring       |
-|                                                                             |
-|                 Unified Reciprocal Rank Fusion (RRF)                        |
-+-----------------------------------------------------------------------------+
-                                      |
-                                      v
-+-----------------------------------------------------------------------------+
-|                         DOMAIN GUARDRAIL CHECK                              |
-|           Cosine Distance > 0.52  --->  [Reject: Out-of-Domain Fallback]    |
-+-----------------------------------------------------------------------------+
-                                      | [Distance <= 0.52: In-Domain Match]
-                                      v
-+-----------------------------------------------------------------------------+
-|                      LOCAL REASONING ENGINE (LLM)                           |
-|              Qwen2.5-1.5B-Instruct Model (Local Transformers)               |
-|              Strict ground-truth extraction from retrieved text             |
-+-----------------------------------------------------------------------------+
-                                      |
-                                      v
-+-----------------------------------------------------------------------------+
-|                    CITATION VALIDATOR & WEIGHT CLASSIFIER                   |
-|   * Citation Guard: Verify cited rule numbers against 15 indexed rules      |
-|   * Legal Weight: MUST (Criminal Offence) vs SHOULD (Advisory Guidance)    |
-|   * Suggestions: Append 3 contextual follow-up questions                    |
-+-----------------------------------------------------------------------------+
-                                      |
-                                      v
-+-----------------------------------------------------------------------------+
-|                    FINAL GROUNDED RESPONSE WITH BADGES                      |
-+-----------------------------------------------------------------------------+
+                        +----------------------------+
+                        | Fast Greeting Matcher      |
+                        | (checks hello, thanks, etc)|
+                        +----------------------------+
+                               /              \
+                     [Matched]                  [Question]
+                         |                          |
+                         v                          v
+                  Instant Response        +--------------------+
+                                          | Hybrid Search Engine|
+                                          | - ChromaDB MiniLM  |
+                                          | - Lexical BM25     |
+                                          +--------------------+
+                                                    |
+                                                    v
+                                       +-------------------------+
+                                       | Distance Check (> 0.52) |
+                                       +-------------------------+
+                                        /                       \
+                             [Irrelevant]                       [Relevant Rule]
+                                  |                                    |
+                                  v                                    v
+                         Out-of-Scope Fallback               +--------------------+
+                                                             | Local Qwen 2.5 LLM |
+                                                             +--------------------+
+                                                                       |
+                                                                       v
+                                                             +--------------------+
+                                                             | Citation & MUST /  |
+                                                             | SHOULD Legal Check |
+                                                             +--------------------+
+                                                                       |
+                                                                       v
+                                                                 Final Answer
 ```
 
-1. User Interface Layer
-I provide three distinct ways to interact with my assistant:
-* Interactive Console Mode: A terminal interface with rich formatting for questions, quizzes, and scenario coaching.
-* Lightweight Web Interface: A zero-dependency web server built directly on Python's http.server running at port 7860.
-* Streamlit Dashboard: A multi-tab dashboard offering interactive chat, rule browsing, and knowledge assessments.
+How I built each stage of my architecture:
 
-2. Fast Conversational Router
-Before querying the retrieval pipeline, my assistant passes user input through a compiled regex matcher loaded from my interactive prompts dataset. If a user offers a greeting, farewell, or expression of thanks, my system returns an instant conversational response in under 5 milliseconds without invoking heavy neural models.
+* Multiple User Interfaces: I wrote three ways to interact with my assistant depending on the environment: a command-line terminal interface (main.py), a zero-dependency lightweight web server on port 7860 (web_ui.py), and a full dark-mode Streamlit dashboard (app.py). All three call the exact same coordinator in assistant.py.
 
-3. Hybrid Retrieval Pipeline
-For road safety questions, I built a hybrid retrieval engine combining two complementary search methods:
-* Dense Vector Search: I use sentence-transformers/all-MiniLM-L6-v2 to encode questions and Highway Code rules into 384-dimensional vector embeddings, persisted locally in ChromaDB. This captures semantic concepts and intent even when the user does not use exact legal terminology.
-* Sparse Lexical Search: I implemented a custom BM25 keyword ranking algorithm that scores documents using term frequency and inverse document frequency (IDF). This ensures exact technical terms like "Dutch Reach", "Rule 195", or "pelican crossing" receive high relevance scores.
-* Reciprocal Rank Fusion (RRF): My retriever combines the dense vector distances and BM25 scores into a unified ranking to return the top 3 most relevant rules.
+* Fast Conversational Router: Before running heavy embedding calculations, I pass the input through a compiled regex matcher loaded from my interactive prompts dataset. If someone says hello, asks how the bot works, or says thank you, my system replies in under 5ms without touching the neural models.
 
-4. Domain Guardrail & Out-of-Domain Refusal
-I implemented a cosine distance threshold of 0.52 on the top vector match. If a user asks a question unrelated to UK traffic rules (such as general knowledge, cooking recipes, or sports), the cosine distance exceeds 0.52. In this event, my system immediately halts the pipeline and returns a transparent refusal, stating that it is strictly designed for UK road safety questions.
+* Hybrid Search (Vectors + Keywords): Relying on vector embeddings alone can sometimes miss exact rule numbers, while keyword search alone fails on natural phrasing. In rag.py, I combined both:
+  - ChromaDB Vector Store: Encodes questions with sentence-transformers/all-MiniLM-L6-v2 into 384-dimensional embeddings to capture general meaning.
+  - Custom BM25 Scorer: Matches exact terminology like "Dutch Reach", "Rule 195", or "pelican crossing".
+  - Reciprocal Rank Fusion: Merges vector distances and BM25 scores so the top rules are genuinely relevant.
 
-5. Local LLM Reasoning & Legal Weighting
-When valid rules are retrieved, my assistant feeds the question and exact rule context into a locally hosted Qwen2.5-1.5B-Instruct language model running via HuggingFace Transformers. I instruct the model to reason strictly from the retrieved text. My coordinator then validates whether the rule is mandatory (MUST) or advisory (SHOULD) and displays the corresponding legal badge.
+* 0.52 Distance Guardrail: If someone asks something that has nothing to do with UK driving (like cooking recipes or sports trivia), the semantic distance increases. If the top match is above my 0.52 cutoff, my assistant halts immediately and returns a polite message stating that it only answers UK road safety questions.
 
-6. Citation Verification Guardrail
-To ensure factual accuracy, my post-processing logic extracts every rule number cited by the model and checks it against my 15 ground-truth rules in the database. If the model attempts to invent an unverified rule number, my assistant automatically substitutes the verified ground-truth text from the retrieved rule.
+* Local Qwen 2.5 Model: When valid rules are retrieved, I send the context and the question to a local Qwen2.5-1.5B-Instruct language model running via HuggingFace Transformers. I instruct the model to reason strictly from the retrieved text so it does not make up facts.
+
+* Citation Verification and Legal Tagging: In models.py, my code inspects the answer to verify that any cited rule number exists in my 15-rule database. It also checks whether the rule is mandatory criminal law (MUST / MUST NOT) or advisory guidance (SHOULD) and displays the appropriate legal badge.
 
 ---
 
