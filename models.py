@@ -1,21 +1,10 @@
-"""
-models.py - Local LLM Reasoning for The Zebra Crossing Assistant.
-
-Features:
-- Offline reasoning powered by Qwen2.5-1.5B-Instruct.
-- Strict legal authority grounding: preserves mandatory requirements (MUST / MUST NOT)
-  versus advisory guidance (SHOULD / SHOULD NOT).
-- Hallucination guardrail: verifies cited rule numbers against retrieved context.
-  If an uncited or hallucinated rule number is detected, automatically falls back
-  to direct official quotes.
-"""
+# Enoch Obikoya - Personal Road Safety Assistant Project
 
 import os
 import sys
 import re
 from typing import List, Dict, Optional, Set
 
-# Ensure UTF-8 stdout for Windows consoles
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -27,21 +16,16 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 def extract_rule_numbers(text: str) -> List[str]:
-    """Extracts all rule numbers (e.g. '195', '191') mentioned in text."""
     return re.findall(r"\brule\s*(\d+)\b", text, re.IGNORECASE)
 
 
 def extract_primary_rule_number(rule_id: str) -> Optional[str]:
-    """Extracts the numeric identifier from a rule string like 'RULE 195'."""
     match = re.search(r"\b(\d+)\b", rule_id)
     return match.group(1) if match else None
 
 
+# Enoch Obikoya - Local Qwen language model and citation validation
 class LocalQwenLLM:
-    """
-    Encapsulates Qwen2.5-1.5B-Instruct for authoritative, citation-grounded answers.
-    Optimized to run on either CUDA GPU or multi-threaded CPU.
-    """
     def __init__(self, model_id: str = "Qwen/Qwen2.5-1.5B-Instruct"):
         self.model_id = model_id
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -69,16 +53,11 @@ class LocalQwenLLM:
         print("[LLM] Local LLM loaded successfully and ready for Q&A.", flush=True)
 
     def _format_fallback_answer(self, top_rule: Dict) -> str:
-        """
-        Creates a faithful direct quotation from the top-ranked rule
-        when hallucination detection catches an ungrounded citation.
-        """
         header = top_rule.get("header", "UK Highway Code")
         text = top_rule.get("text", "")
         rule_num = extract_primary_rule_number(top_rule.get("rule_id", ""))
         rule_ref = f"Rule {rule_num}" if rule_num else header
 
-        # Pick the first substantive sentence of the rule
         content_lines = [
             line.strip() for line in text.splitlines()
             if line.strip() and not line.startswith("[RULE") and not line.startswith("#")
@@ -91,21 +70,12 @@ class LocalQwenLLM:
         question: str,
         retrieved_rules: List[Dict]
     ) -> str:
-        """
-        Generates an authoritative, cited answer grounded strictly in retrieved rules.
-
-        Enforces:
-        - Direct citation of rule number (e.g. 'According to Rule 195, ...').
-        - Preserves MUST (mandatory legal requirement) vs SHOULD (advisory).
-        - Grounded verification: rejects hallucinations and falls back to rule quote.
-        """
         if not retrieved_rules:
             return (
                 "I am not sure based on the traffic rules in my database. "
                 "I am designed specifically to answer UK road safety questions."
             )
 
-        # Collect valid rule numbers from retrieved context for verification
         valid_rule_nums: Set[str] = set()
         context_blocks: List[str] = []
 
@@ -173,13 +143,10 @@ class LocalQwenLLM:
             generated_ids = [out[len(inp):] for inp, out in zip(inputs.input_ids, outputs)]
             response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
 
-        # Post-generation Verification & Cleanup
-        # 1. Clean accidental leading Yes/No for authoritative tone
         cleaned = re.sub(r"^(?:yes|no)[,\.\s]+", "", response, flags=re.IGNORECASE).strip()
         if cleaned and cleaned[0].islower():
             cleaned = cleaned[0].upper() + cleaned[1:]
 
-        # 2. Strict citation verification: reject hallucinated rule numbers
         cited_nums = extract_rule_numbers(cleaned)
         hallucinated = [num for num in cited_nums if num not in valid_rule_nums]
 
@@ -187,7 +154,6 @@ class LocalQwenLLM:
             print(f"[Citation Guard] Rejected hallucinated rule citation(s) {hallucinated}. Using official quote.")
             return self._format_fallback_answer(retrieved_rules[0])
 
-        # 3. If no rule number was explicitly cited, prepend top rule citation
         if not cited_nums and cleaned:
             top_rule = retrieved_rules[0]
             top_num = extract_primary_rule_number(top_rule.get("rule_id", ""))

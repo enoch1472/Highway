@@ -1,15 +1,4 @@
-"""
-assistant.py - Core Road Safety Assistant Engine for The Zebra Crossing.
-
-Encapsulates:
-- Query handling through the hybrid RAG + local LLM pipeline.
-- Conversational prompt handling loaded from data/interactive_prompts.csv,
-  so greetings, farewells, and casual chat get friendly responses instead
-  of the out-of-domain refusal.
-- Smart context-aware follow-up suggestions (e.g. suggesting related rules).
-- Clear legal status extraction (Mandatory Law vs Advisory Guidance).
-- Conversation history tracking.
-"""
+# Enoch Obikoya - Personal Road Safety Assistant Project
 
 import csv
 import os
@@ -20,16 +9,7 @@ from rag import RuleRAG
 from models import LocalQwenLLM, extract_rule_numbers, extract_primary_rule_number
 
 
-# ---------------------------------------------------------------------------
-# Conversational Prompt Matcher  (loaded from data/interactive_prompts.csv)
-# ---------------------------------------------------------------------------
-
 def _load_interactive_prompts(csv_path: str = None) -> List[Dict]:
-    """
-    Loads the interactive_prompts.csv file and returns a list of prompt entries.
-    Each entry has: category, compiled_patterns (list of regex), response,
-    suggestions (list of str), and badge.
-    """
     if csv_path is None:
         csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 "data", "interactive_prompts.csv")
@@ -65,21 +45,10 @@ def _load_interactive_prompts(csv_path: str = None) -> List[Dict]:
     return prompts
 
 
-# Module-level cache so the CSV is loaded once at import time
 _INTERACTIVE_PROMPTS: List[Dict] = _load_interactive_prompts()
 
 
 def match_interactive_prompt(user_input: str) -> Optional[Dict]:
-    """
-    Checks whether *user_input* matches any conversational pattern from
-    interactive_prompts.csv.  Returns the matching entry dict or None.
-
-    Matching logic:
-      - Short inputs (<=6 words) are checked for an exact pattern match
-        anywhere in the text.
-      - Longer inputs are skipped (they are likely real questions that should
-        go to the RAG pipeline).
-    """
     cleaned = user_input.strip()
     if len(cleaned.split()) > 6:
         return None
@@ -91,7 +60,6 @@ def match_interactive_prompt(user_input: str) -> Optional[Dict]:
     return None
 
 
-# Curated dictionary of related questions for interactive follow-up suggestions
 TOPIC_SUGGESTIONS: Dict[str, List[str]] = {
     "zebra": [
         "A pedestrian is waiting at the kerb of a zebra crossing. Do I have to stop?",
@@ -157,34 +125,17 @@ DEFAULT_SUGGESTIONS: List[str] = [
 ]
 
 
+# Enoch Obikoya - Assistant coordinator managing retrieval, responses, and history
 class RoadSafetyAssistant:
-    """
-    High-level coordinator combining knowledge retrieval,
-    local LLM reasoning, follow-up suggestions, and session history.
-    """
     def __init__(self, rag: Optional[RuleRAG] = None, llm: Optional[LocalQwenLLM] = None):
         self.rag = rag or RuleRAG()
         self.llm = llm or LocalQwenLLM()
         self.history: List[Dict] = []
 
     def ask(self, question: str) -> Dict:
-        """
-        Processes a user question through the RAG + LLM pipeline.
-        Before hitting RAG, checks if the input matches a conversational
-        prompt from data/interactive_prompts.csv (greetings, thanks, etc.)
-        so users get a friendly response instead of the out-of-domain refusal.
-
-        Returns a rich response dictionary containing:
-        - answer
-        - retrieved_rules
-        - legal_weight ('MUST', 'SHOULD', 'OUT_OF_DOMAIN', or 'CONVERSATION')
-        - suggestions (2-3 relevant follow-up questions)
-        - elapsed_seconds
-        """
         clean_q = question.strip()
         t0 = time.time()
 
-        # --- Conversational prompt check (CSV-driven) ---
         chat_match = match_interactive_prompt(clean_q)
         if chat_match:
             elapsed = time.time() - t0
@@ -203,7 +154,6 @@ class RoadSafetyAssistant:
             self.history.append(response_payload)
             return response_payload
 
-        # --- Standard RAG + LLM pipeline ---
         retrieved_rules, status_msg = self.rag.retrieve(
             query=clean_q,
             top_k=3,
@@ -231,19 +181,16 @@ class RoadSafetyAssistant:
             self.history.append(response_payload)
             return response_payload
 
-        # Generate LLM response grounded in retrieved rules
         t_gen0 = time.time()
         answer = self.llm.generate_answer(clean_q, retrieved_rules)
         total_elapsed = time.time() - t0
 
-        # Determine primary rule and legal weight
         top_rule = retrieved_rules[0]
         primary_weight = top_rule.get("legal_weight", "SHOULD")
         if any(r.get("legal_weight") == "MUST" for r in retrieved_rules):
             if "must" in answer.lower():
                 primary_weight = "MUST"
 
-        # Generate contextual follow-up questions
         suggestions = self._find_follow_ups(clean_q, retrieved_rules)
 
         response_payload = {
@@ -262,7 +209,6 @@ class RoadSafetyAssistant:
         return response_payload
 
     def _find_follow_ups(self, question: str, retrieved: List[Dict]) -> List[str]:
-        """Identifies 2 to 3 intelligent follow-up suggestions based on query and retrieved rules."""
         text_corpus = (question + " " + " ".join(r.get("header", "") for r in retrieved)).lower()
 
         found_suggestions: List[str] = []
@@ -284,5 +230,4 @@ class RoadSafetyAssistant:
         return found_suggestions[:3]
 
     def clear_history(self):
-        """Resets conversational history."""
         self.history.clear()
