@@ -1,14 +1,4 @@
-"""
-app.py - Streamlit GUI for The Zebra Crossing Road Safety Assistant.
-
-Faithfully implements the modern dark interface shown in Design.png:
-- Tabbed Navigation: Chat, Interactive Quiz, Rules Catalog, Scenarios.
-- Quick prompt pills for one-click questions.
-- Legal authority badges (Mandatory MUST vs Advisory SHOULD).
-- Collapsible retrieved rules with cosine distance scores.
-- Interactive Highway Code Quiz with no time limit.
-- Powered by cached offline models (SentenceTransformers + Qwen2.5-1.5B).
-"""
+# Enoch Obikoya - Personal Road Safety Assistant Project
 
 import time
 import streamlit as st
@@ -17,24 +7,20 @@ from models import LocalQwenLLM
 from assistant import RoadSafetyAssistant
 from interactive import QUIZ_QUESTIONS, SCENARIOS
 
-# Set page configuration
 st.set_page_config(
     page_title="The Zebra Crossing - Road Safety Assistant",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Dark theme CSS matching Design.png
 st.markdown("""
 <style>
-    /* Global Dark Theme */
     .stApp {
         background-color: #0d0e11;
         color: #e6e8eb;
         font-family: 'Inter', -apple-system, sans-serif;
     }
     
-    /* Top Header Bar */
     .header-box {
         display: flex;
         align-items: center;
@@ -73,7 +59,6 @@ st.markdown("""
         margin: 0;
     }
 
-    /* Badges */
     .badge-must {
         background-color: #dc2626;
         color: #ffffff;
@@ -105,7 +90,6 @@ st.markdown("""
         display: inline-block;
     }
 
-    /* Assistant Message Card */
     .ai-card {
         background-color: #161920;
         border: 1px solid #232730;
@@ -131,7 +115,6 @@ st.markdown("""
         margin-bottom: 12px;
     }
 
-    /* Retrieved Rules Table */
     .retrieved-box {
         background-color: #111317;
         border: 1px solid #232730;
@@ -159,7 +142,6 @@ st.markdown("""
         border-bottom: none;
     }
 
-    /* Suggestions */
     .sugg-box {
         margin-top: 14px;
         padding-top: 10px;
@@ -185,7 +167,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# Cache models in memory across Streamlit reruns
+# Enoch Obikoya - Streamlit assistant setup and interface components
 @st.cache_resource(show_spinner="Initializing UK Highway Code Knowledge Base...")
 def load_assistant():
     rag = RuleRAG(data_path="data/rules.txt", persist_dir="./chroma_db")
@@ -193,7 +175,6 @@ def load_assistant():
     return RoadSafetyAssistant(rag=rag, llm=llm)
 
 
-# Initialize Session State
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "quiz_index" not in st.session_state:
@@ -207,7 +188,6 @@ if "quiz_answers" not in st.session_state:
 
 assistant = load_assistant()
 
-# Sidebar
 with st.sidebar:
     st.markdown("""
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
@@ -244,9 +224,6 @@ with st.sidebar:
         st.rerun()
 
 
-# =============================================================================
-# TAB 1: ROAD SAFETY CHAT
-# =============================================================================
 if mode == "Road Safety Chat":
     st.markdown("""
     <div class="header-box">
@@ -263,7 +240,6 @@ if mode == "Road Safety Chat":
     </div>
     """, unsafe_allow_html=True)
 
-    # Quick prompt pills
     st.write("**Quick Questions:**")
     p_col1, p_col2, p_col3 = st.columns(3)
     quick_q = None
@@ -277,7 +253,6 @@ if mode == "Road Safety Chat":
         if st.button("Can a cyclist ride across a toucan crossing?", use_container_width=True):
             quick_q = "Can a cyclist ride across a Toucan crossing?"
 
-    # Display Chat History
     for item in st.session_state.chat_history:
         with st.chat_message("user"):
             st.write(item["question"])
@@ -309,7 +284,6 @@ if mode == "Road Safety Chat":
             """
             st.markdown(card_html, unsafe_allow_html=True)
 
-            # Retrieved Rules Card
             retrieved = item.get("retrieved_rules", [])
             if retrieved:
                 with st.expander(f"Relevant Rules Retrieved ({len(retrieved)} rules)", expanded=False):
@@ -326,7 +300,6 @@ if mode == "Road Safety Chat":
                         </div>
                         """, unsafe_allow_html=True)
 
-            # Follow-up Suggestions
             suggestions = item.get("suggestions", [])
             if suggestions:
                 st.markdown("**You might also want to ask:**")
@@ -336,7 +309,6 @@ if mode == "Road Safety Chat":
                         if st.button(f"{s}", key=f"sugg_{item['question']}_{idx}", use_container_width=True):
                             quick_q = s
 
-    # User Input
     user_query = st.chat_input("Ask a traffic or Highway Code question...") or quick_q
 
     if user_query:
@@ -351,9 +323,6 @@ if mode == "Road Safety Chat":
             st.rerun()
 
 
-# =============================================================================
-# TAB 2: INTERACTIVE HIGHWAY CODE QUIZ (NO TIME LIMIT)
-# =============================================================================
 elif mode == "Interactive Safety Quiz":
     st.markdown("""
     <div class="header-box">
@@ -421,9 +390,6 @@ elif mode == "Interactive Safety Quiz":
             st.rerun()
 
 
-# =============================================================================
-# TAB 3: OFFICIAL RULES CATALOG
-# =============================================================================
 elif mode == "Rules Catalog":
     st.markdown("""
     <div class="header-box">
@@ -484,9 +450,6 @@ elif mode == "Rules Catalog":
             st.write(r["text"])
 
 
-# =============================================================================
-# TAB 4: ROAD SCENARIOS
-# =============================================================================
 elif mode == "Road Scenarios":
     st.markdown("""
     <div class="header-box">

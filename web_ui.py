@@ -1,14 +1,4 @@
-"""
-web_ui.py - Zero-Dependency Interactive Web UI for The Zebra Crossing Assistant.
-
-Faithfully implements the modern dark UI shown in Design.png:
-- Tabbed interface: Chat, Rules Catalog, and Interactive Quiz.
-- Quick prompt pills for one-click questions.
-- Legal authority badges (MUST in red, SHOULD in amber).
-- Collapsible retrieved rules with cosine distance scores.
-- Interactive Highway Code Quiz with instant scoring.
-- Runs on Python's built-in http.server (no external web frameworks required).
-"""
+# Enoch Obikoya - Personal Road Safety Assistant Project
 
 import json
 import urllib.parse
@@ -165,6 +155,7 @@ HTML_PAGE = """<!DOCTYPE html>
       display: none;
       flex-direction: column;
       overflow-y: auto;
+      min-height: 0;
       padding: 24px 32px;
     }
     .tab-content.active {
@@ -355,6 +346,25 @@ HTML_PAGE = """<!DOCTYPE html>
       transition: border-color 0.2s;
     }
     .chat-input:focus { border-color: #f59e0b; }
+    .rule-search-input {
+      width: 100%;
+      max-width: 440px;
+      height: 44px;
+      min-height: 44px;
+      max-height: 44px;
+      flex: none;
+      background: #161920;
+      border: 1px solid #2b313e;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      transition: border-color 0.2s;
+    }
+    .rule-search-input:focus { border-color: #f59e0b; }
     .send-btn {
       background: #f59e0b;
       color: #000;
@@ -499,6 +509,7 @@ HTML_PAGE = """<!DOCTYPE html>
           <h3 id="quiz-q-title" style="margin-bottom: 16px;">Loading quiz...</h3>
           <div id="quiz-options"></div>
         </div>
+        <div id="quiz-finished-box" style="display:none; text-align: center; padding: 10px 0;"></div>
         <div id="quiz-feedback" style="display:none; margin-top: 18px; padding: 14px; border-radius: 8px;"></div>
         <button id="quiz-next-btn" class="send-btn" style="margin-top: 16px; display: none;" onclick="nextQuiz()">Next Question</button>
       </div>
@@ -508,7 +519,7 @@ HTML_PAGE = """<!DOCTYPE html>
     <div class="tab-content" id="tab-rules">
       <div class="page-title">Official Rules Catalog</div>
       <p style="color: #9ca3af;">All loaded rules from the UK Highway Code knowledge base.</p>
-      <input type="text" id="rule-search-box" class="chat-input" style="margin-top: 14px; max-width: 400px;" placeholder="Filter rules by keyword..." oninput="filterRules()">
+      <input type="text" id="rule-search-box" class="rule-search-input" placeholder="Filter rules by keyword or rule number..." oninput="filterRules()">
       <table class="data-table" id="rules-table">
         <thead>
           <tr>
@@ -557,7 +568,6 @@ HTML_PAGE = """<!DOCTYPE html>
 
       const container = document.getElementById('chat-messages');
 
-      // Add user message
       const userHtml = `
         <div class="msg-row">
           <div class="avatar user">U</div>
@@ -567,7 +577,6 @@ HTML_PAGE = """<!DOCTYPE html>
         </div>`;
       container.innerHTML += userHtml;
 
-      // Add loading placeholder
       const loadingId = 'ai-loading-' + Date.now();
       container.innerHTML += `
         <div class="msg-row" id="${loadingId}">
@@ -670,8 +679,14 @@ HTML_PAGE = """<!DOCTYPE html>
     }
 
     async function startQuiz() {
-      const res = await fetch('/api/quiz');
-      quizData = await res.json();
+      document.getElementById('quiz-question-box').style.display = 'block';
+      document.getElementById('quiz-finished-box').style.display = 'none';
+      document.getElementById('quiz-feedback').style.display = 'none';
+      document.getElementById('quiz-next-btn').style.display = 'none';
+      if (!quizData || quizData.length === 0) {
+        const res = await fetch('/api/quiz');
+        quizData = await res.json();
+      }
       currentQuizIndex = 0;
       quizScore = 0;
       showQuizQuestion();
@@ -715,13 +730,16 @@ HTML_PAGE = """<!DOCTYPE html>
         showQuizQuestion();
       } else {
         const pct = Math.round((quizScore / quizData.length) * 100);
-        document.getElementById('quiz-question-box').innerHTML = `
+        document.getElementById('quiz-question-box').style.display = 'none';
+        document.getElementById('quiz-feedback').style.display = 'none';
+        document.getElementById('quiz-next-btn').style.display = 'none';
+        const finishBox = document.getElementById('quiz-finished-box');
+        finishBox.style.display = 'block';
+        finishBox.innerHTML = `
           <h3>Quiz Finished!</h3>
           <p style="font-size: 18px; margin-top: 10px;">Your score: <strong>${quizScore}/${quizData.length} (${pct}%)</strong></p>
           <p style="color: #9ca3af; margin-top: 6px;">${pct >= 80 ? 'Outstanding Highway Code Knowledge!' : 'Good effort! Review the rules to improve.'}</p>
           <button class="send-btn" style="margin-top: 16px;" onclick="startQuiz()">Retake Quiz</button>`;
-        document.getElementById('quiz-feedback').style.display = 'none';
-        document.getElementById('quiz-next-btn').style.display = 'none';
       }
     }
   </script>
@@ -730,6 +748,7 @@ HTML_PAGE = """<!DOCTYPE html>
 """
 
 
+# Enoch Obikoya - Web request handler and JSON API endpoints
 class ZebraCrossingWebHandler(BaseHTTPRequestHandler):
     assistant: Optional[RoadSafetyAssistant] = None
 
@@ -739,7 +758,6 @@ class ZebraCrossingWebHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
 
-        # Serve the single-page HTML interface
         if parsed.path == "/" or parsed.path == "/index.html":
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -747,13 +765,11 @@ class ZebraCrossingWebHandler(BaseHTTPRequestHandler):
             self.wfile.write(HTML_PAGE.encode("utf-8"))
             return
 
-        # API endpoint to fetch all loaded Highway Code rules
         if parsed.path == "/api/rules":
             rules = self.assistant.rag.get_all_rules_summary()
             self._send_json(rules)
             return
 
-        # API endpoint to fetch quiz questions
         if parsed.path == "/api/quiz":
             self._send_json(QUIZ_QUESTIONS)
             return
@@ -787,7 +803,6 @@ class ZebraCrossingWebHandler(BaseHTTPRequestHandler):
 
 
 def launch_web_ui(assistant: RoadSafetyAssistant, port: int = 7860):
-    """Starts the zero-dependency web interface."""
     ZebraCrossingWebHandler.assistant = assistant
     server = HTTPServer(("127.0.0.1", port), ZebraCrossingWebHandler)
     url = f"http://127.0.0.1:{port}"
