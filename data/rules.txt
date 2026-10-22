@@ -1,7 +1,7 @@
 # =============================================================================
 # THE OFFICIAL UK HIGHWAY CODE - ROAD SAFETY RULES DATABASE
 # =============================================================================
-# Format: [RULE <id>] [<LEGAL_WEIGHT: MUST|SHOULD>] <Title>
+# Format: Rule Number - [LEGAL_WEIGHT] - Title
 # Note:
 #   [MUST]   denotes a mandatory legal requirement under UK law (Road Traffic Act).
 #            Failure to comply is a criminal offense punishable by fines, penalty points, or disqualification.
